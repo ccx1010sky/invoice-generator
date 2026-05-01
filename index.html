@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f766e" />
+    <meta
+      name="description"
+      content="Create UK VAT invoices, preview them instantly, and export PDF files locally from any device."
+    />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon.svg" />
+    <title>MTD VAT Invoice Generator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">MTD-ready VAT invoices</p>
+        <h1>Professional invoice PDF generator</h1>
+      </div>
+      <div class="top-control">
+        <div class="top-actions">
+          <button id="sampleButton" type="button" class="secondary">Sample</button>
+          <button id="saveButton" type="button" class="secondary">Save Draft</button>
+          <button id="installButton" type="button" class="secondary" hidden>Install App</button>
+          <button id="pdfButton" type="button" class="primary">Export PDF</button>
+        </div>
+        <p id="actionStatus" class="action-status" role="status" aria-live="polite">Ready</p>
+        <p id="appModeStatus" class="app-mode-status">Private local storage · PDF export on device</p>
+      </div>
+    </header>
+
+    <nav class="page-tabs" aria-label="Invoice app pages">
+      <button id="editPageButton" class="page-tab active" type="button" aria-controls="editPage" aria-current="page">Edit Invoice</button>
+      <button id="previewPageButton" class="page-tab" type="button" aria-controls="previewPage">Live Preview</button>
+    </nav>
+
+    <main class="workspace">
+      <section id="editPage" class="app-page active" aria-label="Edit invoice page">
+        <form id="invoiceForm" class="panel" novalidate>
+        <section>
+          <h2>Company</h2>
+          <div class="grid two">
+            <label>
+              Business name
+              <input id="companyName" required value="Northstar Digital Ltd" />
+            </label>
+            <label>
+              VAT registration number
+              <input id="vatNumber" required value="GB123456789" />
+            </label>
+            <label>
+              Company number
+              <input id="companyNumber" value="12345678" />
+            </label>
+            <label>
+              Email
+              <input id="companyEmail" type="email" value="accounts@northstar.example" />
+            </label>
+            <label class="span">
+              Address
+              <textarea id="companyAddress" required>22 Market Street
+Leeds
+LS1 4AB
+United Kingdom</textarea>
+            </label>
+            <label class="span">
+              Logo upload
+              <input id="logoInput" type="file" accept="image/png,image/jpeg,image/webp" />
+            </label>
+            <div class="logo-upload-preview span">
+              <div class="logo-preview-frame" id="logoPreview" aria-label="Uploaded logo preview">
+                <span>No logo</span>
+              </div>
+              <div>
+                <strong id="logoFileName">No file selected</strong>
+                <p>Your logo appears in the invoice preview as soon as it is selected.</p>
+                <button id="removeLogoButton" class="secondary small" type="button" disabled>Remove Logo</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Client</h2>
+          <div class="grid two">
+            <label>
+              Client name
+              <input id="clientName" required value="Acme Studio Ltd" />
+            </label>
+            <label>
+              Client VAT number
+              <input id="clientVat" value="GB987654321" />
+            </label>
+            <label class="span">
+              Billing address
+              <textarea id="clientAddress" required>11 Creative Yard
+Manchester
+M1 2CD
+United Kingdom</textarea>
+            </label>
+          </div>
+        </section>
+
+        <section>
+          <h2>Invoice</h2>
+          <div class="grid three">
+            <label>
+              Invoice number
+              <input id="invoiceNumber" required value="INV-2026-001" />
+            </label>
+            <label>
+              Issue date
+              <input id="issueDate" type="date" required />
+            </label>
+            <label>
+              Due date
+              <input id="dueDate" type="date" required />
+            </label>
+            <label>
+              VAT rate
+              <select id="vatRate">
+                <option value="20" selected>20% standard rate</option>
+                <option value="0">0% zero-rated</option>
+              </select>
+            </label>
+            <label>
+              Currency
+              <select id="currency">
+                <option value="GBP" selected>GBP</option>
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
+              </select>
+            </label>
+            <label>
+              Payment terms
+              <input id="paymentTerms" value="Payment due within 14 days" />
+            </label>
+            <label>
+              Template
+              <select id="invoiceTemplate">
+                <option value="professional" selected>Professional services</option>
+                <option value="contractor">Contractor</option>
+                <option value="retail">Retail supply</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <h2>Line Items</h2>
+            <button id="addItemButton" type="button" class="secondary small">Add Item</button>
+          </div>
+          <div class="items" id="items"></div>
+        </section>
+
+        <section>
+          <h2>Payment and HMRC wording</h2>
+          <div class="grid two">
+            <label class="span">
+              Bank details
+              <textarea id="bankDetails">Account name: Northstar Digital Ltd
+Sort code: 20-00-00
+Account number: 12345678</textarea>
+            </label>
+            <label class="span">
+              Notes
+              <textarea id="notes">VAT invoice. Tax point is the invoice issue date. This digital record is prepared for Making Tax Digital record keeping.</textarea>
+            </label>
+          </div>
+        </section>
+
+
+          <div class="page-footer-actions">
+            <button id="goPreviewButton" class="primary" type="button">View Live Preview</button>
+          </div>
+          <p id="status" class="status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section id="previewPage" class="app-page" aria-label="Live invoice preview page">
+      <aside class="preview-shell" aria-label="Invoice preview">
+        <article id="invoicePreview" class="invoice-preview"></article>
+      </aside>
+      </section>
+    </main>
+
+    <template id="itemTemplate">
+      <div class="item-row">
+        <label>
+          Description
+          <input class="item-description" required />
+        </label>
+        <label>
+          Qty
+          <input class="item-qty" type="number" min="0" step="0.01" required />
+        </label>
+        <label>
+          Unit price
+          <input class="item-price" type="number" min="0" step="0.01" required />
+        </label>
+        <button class="remove-item" type="button" aria-label="Remove line item">Remove</button>
+      </div>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>
