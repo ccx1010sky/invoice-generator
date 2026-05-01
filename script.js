@@ -190,8 +190,8 @@ function renderPreview() {
   }
   preview.className = `invoice-preview ${data.invoiceTemplate || "professional"}`;
   const logo = data.logoDataUrl
-    ? `<img alt="Uploaded company logo" src="${data.logoDataUrl}" />`
-    : `<span>${escapeHtml((data.companyName || "Logo").slice(0, 2).toUpperCase())}</span>`;
+    ? `<div class="logo-box"><img alt="Uploaded company logo" src="${data.logoDataUrl}" /></div>`
+    : "";
 
   preview.innerHTML = `
     <header class="invoice-head">
@@ -200,7 +200,7 @@ function renderPreview() {
         <h3>${escapeHtml(data.invoiceNumber || "Draft Invoice")}</h3>
         <p>${escapeHtml(data.companyName)}</p>
       </div>
-      <div class="logo-box">${logo}</div>
+      ${logo}
     </header>
 
     <section class="meta-grid">
@@ -265,13 +265,15 @@ function renderPreview() {
 
 function updateLogoPreview() {
   if (logoDataUrl) {
+    logoPreview.classList.remove("empty");
     logoPreview.innerHTML = `<img alt="Selected company logo" src="${logoDataUrl}" />`;
     logoFileName.textContent = logoName || "Logo selected";
     removeLogoButton.disabled = false;
     return;
   }
 
-  logoPreview.innerHTML = "<span>No logo</span>";
+  logoPreview.classList.add("empty");
+  logoPreview.innerHTML = "";
   logoFileName.textContent = "No file selected";
   removeLogoButton.disabled = true;
 }
