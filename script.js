@@ -11,10 +11,6 @@ const saveButton = document.querySelector("#saveButton");
 const sampleButton = document.querySelector("#sampleButton");
 const installButton = document.querySelector("#installButton");
 const appModeStatus = document.querySelector("#appModeStatus");
-const logoInput = document.querySelector("#logoInput");
-const logoPreview = document.querySelector("#logoPreview");
-const logoFileName = document.querySelector("#logoFileName");
-const removeLogoButton = document.querySelector("#removeLogoButton");
 const editPageButton = document.querySelector("#editPageButton");
 const previewPageButton = document.querySelector("#previewPageButton");
 const editPage = document.querySelector("#editPage");
@@ -41,8 +37,6 @@ const fields = [
   "notes",
 ];
 
-let logoDataUrl = "";
-let logoName = "";
 let installPromptEvent = null;
 
 function updateAppModeStatus() {
@@ -162,8 +156,6 @@ function invoiceData() {
   const data = Object.fromEntries(fields.map((id) => [id, getValue(id)]));
   data.vatRate = Number(data.vatRate);
   data.items = items;
-  data.logoDataUrl = logoDataUrl;
-  data.logoName = logoName;
   data.subtotal = items.reduce((sum, item) => sum + item.net, 0);
   data.vat = data.subtotal * (data.vatRate / 100);
   data.total = data.subtotal + data.vat;
@@ -184,15 +176,10 @@ function escapeHtml(value) {
 
 function renderPreview() {
   const data = invoiceData();
-  updateLogoPreview();
   if (previewTotal) {
     previewTotal.textContent = plainMoney(data.total, data.currency);
   }
   preview.className = `invoice-preview ${data.invoiceTemplate || "professional"}`;
-  const logo = data.logoDataUrl
-    ? `<div class="logo-box"><img alt="Uploaded company logo" src="${data.logoDataUrl}" /></div>`
-    : "";
-
   preview.innerHTML = `
     <header class="invoice-head">
       <div>
@@ -200,7 +187,6 @@ function renderPreview() {
         <h3>${escapeHtml(data.invoiceNumber || "Draft Invoice")}</h3>
         <p>${escapeHtml(data.companyName)}</p>
       </div>
-      ${logo}
     </header>
 
     <section class="meta-grid">
@@ -261,21 +247,6 @@ function renderPreview() {
       <p>HMRC VAT invoice fields included: supplier, customer, invoice number, tax point, VAT registration number, net value, VAT rate, VAT amount, and gross total.</p>
     </section>
   `;
-}
-
-function updateLogoPreview() {
-  if (logoDataUrl) {
-    logoPreview.classList.remove("empty");
-    logoPreview.innerHTML = `<img alt="Selected company logo" src="${logoDataUrl}" />`;
-    logoFileName.textContent = logoName || "Logo selected";
-    removeLogoButton.disabled = false;
-    return;
-  }
-
-  logoPreview.classList.add("empty");
-  logoPreview.innerHTML = "";
-  logoFileName.textContent = "No file selected";
-  removeLogoButton.disabled = true;
 }
 
 function addItem(item = { description: "", qty: 1, price: 0 }) {
@@ -348,7 +319,7 @@ function saveDraft() {
     setStatus("Draft saved locally in this browser.");
     flashButton(saveButton, "Saved");
   } catch (error) {
-    setStatus("Draft could not be saved. Try removing a very large logo file.", true);
+    setStatus("Draft could not be saved in this browser.", true);
   }
 }
 
@@ -360,8 +331,6 @@ function loadDraft() {
     fields.forEach((id) => {
       if (data[id] !== undefined) document.querySelector(`#${id}`).value = data[id];
     });
-    logoDataUrl = data.logoDataUrl || "";
-    logoName = data.logoName || "";
     itemsEl.innerHTML = "";
     (data.items || sampleItems).forEach(addItem);
     return true;
@@ -390,9 +359,6 @@ function loadSample() {
     "Account name: Northstar Digital Ltd\nSort code: 20-00-00\nAccount number: 12345678";
   document.querySelector("#notes").value =
     "VAT invoice. Tax point is the invoice issue date. This digital record is prepared for Making Tax Digital record keeping.";
-  logoDataUrl = "";
-  logoName = "";
-  logoInput.value = "";
   itemsEl.innerHTML = "";
   sampleItems.forEach(addItem);
   renderPreview();
@@ -619,32 +585,6 @@ sampleButton.addEventListener("click", loadSample);
 editPageButton.addEventListener("click", () => showPage("edit"));
 previewPageButton.addEventListener("click", () => showPage("preview"));
 goPreviewButton.addEventListener("click", () => showPage("preview"));
-logoInput.addEventListener("change", () => {
-  const file = logoInput.files[0];
-  if (!file) return;
-  if (!file.type.startsWith("image/")) {
-    logoInput.value = "";
-    setStatus("Please choose a PNG, JPG, or WebP image for the logo.", true);
-    return;
-  }
-  const reader = new FileReader();
-  reader.addEventListener("load", () => {
-    logoDataUrl = reader.result;
-    logoName = file.name;
-    renderPreview();
-    setStatus("Logo preview updated.");
-  });
-  reader.readAsDataURL(file);
-});
-
-removeLogoButton.addEventListener("click", () => {
-  logoDataUrl = "";
-  logoName = "";
-  logoInput.value = "";
-  renderPreview();
-  setStatus("Logo removed.");
-});
-
 document.querySelector("#issueDate").value = todayIso();
 document.querySelector("#dueDate").value = addDaysIso(14);
 
