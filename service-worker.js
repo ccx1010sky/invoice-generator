@@ -1,11 +1,11 @@
-const CACHE_NAME = "mtd-invoice-generator-v1";
+const CACHE_NAME = "mtd-invoice-generator-v2";
 const APP_ASSETS = [
-  "/",
-  "/index.html",
-  "/styles.css",
-  "/script.js",
-  "/manifest.json",
-  "/icons/icon.svg"
+  "./",
+  "index.html",
+  "styles.css",
+  "script.js",
+  "manifest.json",
+  "icons/icon.svg"
 ];
 
 self.addEventListener("install", (event) => {
@@ -28,7 +28,7 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
-      return fetch(event.request).catch(() => caches.match("/index.html"));
+      return fetch(event.request).catch(() => caches.match("index.html"));
     })
   );
 });
